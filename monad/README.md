@@ -226,18 +226,18 @@ console.log("DApp identifier:", await myDAppFactory.getAddress());
    - Pause function should only be used in emergency situations
 
 3. **Account Abstraction**
-   - 스마트 월렛의 소유자 키 관리가 중요
-   - 실행자 권한 부여 시 신중한 검토 필요
-   - 서명 기반 실행 시 논스 관리 중요 (replay attack 방지)
-   - 각 DApp마다 독립적인 팩토리 배포 권장
+   - Smart wallet owner key management is critical
+   - Careful review required when granting executor permissions
+   - Nonce management is important for signature-based execution (replay attack prevention)
+   - Independent factory deployment recommended for each DApp
 
-## 네트워크 정보
+## Network Information
 
-- **Monad 테스트넷**: Chain ID 41454 (예시)
-- **Monad 메인넷**: Chain ID 41455 (예시)
+- **Monad Testnet**: Chain ID 41454 (example)
+- **Monad Mainnet**: Chain ID 41455 (example)
 
-_실제 체인 ID와 RPC URL은 Monad 공식 문서를 참조하세요._
+_Please refer to the official Monad documentation for actual chain IDs and RPC URLs._
 
-## 라이선스
+## License
 
 MIT License

@@ -20,17 +20,17 @@ module.exports = {
       url: "http://127.0.0.1:8545",
       chainId: 1337,
     },
-    // Monad 테스트넷 설정
+    // Monad testnet configuration
     monad_testnet: {
       url: process.env.MONAD_TESTNET_RPC_URL || "https://testnet-rpc.monad.xyz",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 10143, // Monad 테스트넷 체인 ID
+      chainId: 10143, // Monad testnet chain ID
     },
-    // Monad 메인넷 설정 (실제 설정은 Monad 문서 참조)
+    // Monad mainnet configuration (refer to Monad documentation for actual settings)
     monad_mainnet: {
       url: process.env.MONAD_MAINNET_RPC_URL || "https://rpc.monad.xyz",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 41455, // Monad 메인넷 체인 ID (예시)
+      chainId: 41455, // Monad mainnet chain ID (example)
     },
   },
   gasReporter: {
@@ -38,7 +38,7 @@ module.exports = {
     currency: "USD",
   },
   etherscan: {
-    // Monad 블록 익스플로러 API 키 (사용 가능시)
+    // Monad block explorer API key (when available)
     apiKey: process.env.MONAD_API_KEY || "",
   },
 };
