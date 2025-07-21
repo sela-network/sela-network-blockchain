@@ -1,0 +1,37 @@
+{
+  "name": "sela-network-contracts",
+  "version": "1.0.0",
+  "description": "Sela Network blockchain smart contracts",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:wallet": "hardhat test test/SelaWallet.test.js",
+    "test:data": "hardhat test test/SelaDataIntegrityRegistry.test.js",
+    "test:point": "hardhat test test/SelaPoint.test.js",
+    "test:core": "hardhat test test/SelaDataIntegrityRegistry.test.js test/SelaPoint.test.js",
+    "deploy": "hardhat run scripts/deploy.js",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "example:wallet": "hardhat run scripts/selaWalletExample.js",
+    "example:wallet:local": "hardhat run scripts/selaWalletExample.js --network localhost",
+    "node": "hardhat node",
+    "clean": "hardhat clean"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "smart-contracts",
+    "sela",
+    "defi"
+  ],
+  "author": "Sela Network",
+  "license": "MIT"
+}
