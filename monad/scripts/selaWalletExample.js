@@ -24,9 +24,9 @@ async function main() {
   // Deploy independent factory for each DApp
   for (let i = 0; i < dappFactories.length; i++) {
     const factory = await SelaWalletFactory.deploy();
-    await factory.waitForDeployment();
+    await factory.deployed();
 
-    const factoryAddress = await factory.getAddress();
+    const factoryAddress = factory.address;
     dappFactories[i].factory = factory;
     dappFactories[i].address = factoryAddress;
 
@@ -89,12 +89,12 @@ async function main() {
     console.log("\n3-1. Sending 0.1 ETH to wallet...");
     const sendTx = await user1.sendTransaction({
       to: testWallet.walletAddress,
-      value: ethers.parseEther("0.1"),
+      value: ethers.utils.parseEther("0.1"),
     });
     await sendTx.wait();
 
     const balance = await wallet.getBalance();
-    console.log(`Wallet balance: ${ethers.formatEther(balance)} ETH`);
+    console.log(`Wallet balance: ${ethers.utils.formatEther(balance)} ETH`);
 
     // Query wallet information
     console.log("\n3-2. Querying wallet information...");
@@ -106,11 +106,11 @@ async function main() {
         Number(walletInfo[2]) * 1000
       ).toLocaleString()}`
     );
-    console.log(`Balance: ${ethers.formatEther(walletInfo[3])} ETH`);
+    console.log(`Balance: ${ethers.utils.formatEther(walletInfo[3])} ETH`);
 
     // Send ether to another address (through wallet)
     console.log("\n3-3. Sending 0.05 ETH through wallet...");
-    const transferAmount = ethers.parseEther("0.05");
+    const transferAmount = ethers.utils.parseEther("0.05");
     const transferTx = await wallet.connect(user1).execute(
       user2.address, // Recipient
       transferAmount, // Amount
@@ -120,7 +120,9 @@ async function main() {
 
     const newBalance = await wallet.getBalance();
     console.log(
-      `Wallet balance after transfer: ${ethers.formatEther(newBalance)} ETH`
+      `Wallet balance after transfer: ${ethers.utils.formatEther(
+        newBalance
+      )} ETH`
     );
 
     // Executor permission management

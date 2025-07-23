@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 /**
  * @title SelaWallet
@@ -11,7 +10,6 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
  */
 contract SelaWallet is ReentrancyGuard {
     using ECDSA for bytes32;
-    using MessageHashUtils for bytes32;
 
     // Wallet owner
     address public owner;
@@ -148,7 +146,7 @@ contract SelaWallet is ReentrancyGuard {
         );
         
         // Verify signature
-        bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
+        bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(messageHash);
         address signer = ethSignedMessageHash.recover(signature);
         require(signer == owner, "Invalid signature");
         

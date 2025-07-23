@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
 import "./SelaWallet.sol";
 
@@ -36,7 +36,9 @@ contract SelaWalletFactory is Ownable, ReentrancyGuard {
         uint256 salt
     );
     
-    constructor() Ownable(msg.sender) {}
+    constructor() {
+        _transferOwnership(msg.sender);
+    }
     
     /**
      * @dev Create smart wallet (using CREATE2)

@@ -3,8 +3,8 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
 /**
  * @title SelaPoint
@@ -42,7 +42,8 @@ contract SelaPoint is ERC20, Ownable, ReentrancyGuard, Pausable {
         string memory _name,
         string memory _symbol,
         uint256 _initialSupply
-    ) ERC20(_name, _symbol) Ownable(msg.sender) {
+    ) ERC20(_name, _symbol) {
+        _transferOwnership(msg.sender);
         // Mint initial supply to contract deployer
         if (_initialSupply > 0) {
             _mint(msg.sender, _initialSupply);
@@ -268,13 +269,13 @@ contract SelaPoint is ERC20, Ownable, ReentrancyGuard, Pausable {
      * @dev Check pause state on ERC20 transfers
      * @param from Sender address
      * @param to Receiver address
-     * @param value Amount of tokens to transfer
+     * @param amount Amount of tokens to transfer
      */
-    function _update(address from, address to, uint256 value) 
-        internal 
-        override 
-        whenNotPaused 
-    {
-        super._update(from, to, value);
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override whenNotPaused {
+        super._beforeTokenTransfer(from, to, amount);
     }
 } 

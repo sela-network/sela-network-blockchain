@@ -6,7 +6,7 @@ async function main() {
   console.log("Deploying contracts with account:", deployer.address);
   console.log(
     "Account balance:",
-    (await deployer.provider.getBalance(deployer.address)).toString()
+    ethers.utils.formatEther(await deployer.getBalance())
   );
 
   // SelaDataIntegrityRegistry contract deployment
@@ -15,10 +15,9 @@ async function main() {
     "SelaDataIntegrityRegistry"
   );
   const selaDataIntegrityRegistry = await SelaDataIntegrityRegistry.deploy();
-  await selaDataIntegrityRegistry.waitForDeployment();
+  await selaDataIntegrityRegistry.deployed();
 
-  const selaDataIntegrityRegistryAddress =
-    await selaDataIntegrityRegistry.getAddress();
+  const selaDataIntegrityRegistryAddress = selaDataIntegrityRegistry.address;
   console.log(
     "SelaDataIntegrityRegistry deployment completed:",
     selaDataIntegrityRegistryAddress
@@ -30,11 +29,11 @@ async function main() {
   const selaPoint = await SelaPoint.deploy(
     "Sela Point", // Token name
     "Sela", // Token symbol
-    ethers.parseEther("1000000") // Initial supply (1,000,000 Sela)
+    ethers.utils.parseEther("1000000") // Initial supply (1,000,000 Sela)
   );
-  await selaPoint.waitForDeployment();
+  await selaPoint.deployed();
 
-  const selaPointAddress = await selaPoint.getAddress();
+  const selaPointAddress = selaPoint.address;
   console.log("SelaPoint deployment completed:", selaPointAddress);
 
   // SelaWalletFactory contract deployment
@@ -43,9 +42,9 @@ async function main() {
     "SelaWalletFactory"
   );
   const selaWalletFactory = await SelaWalletFactory.deploy();
-  await selaWalletFactory.waitForDeployment();
+  await selaWalletFactory.deployed();
 
-  const selaWalletFactoryAddress = await selaWalletFactory.getAddress();
+  const selaWalletFactoryAddress = selaWalletFactory.address;
   console.log(
     "SelaWalletFactory deployment completed:",
     selaWalletFactoryAddress
@@ -74,8 +73,12 @@ async function main() {
   console.log("\n=== SelaPoint Token Information ===");
   console.log("Token name:", name);
   console.log("Token symbol:", symbol);
-  console.log("Total supply:", ethers.formatEther(totalSupply), "Sela");
-  console.log("Deployer balance:", ethers.formatEther(deployerBalance), "Sela");
+  console.log("Total supply:", ethers.utils.formatEther(totalSupply), "Sela");
+  console.log(
+    "Deployer balance:",
+    ethers.utils.formatEther(deployerBalance),
+    "Sela"
+  );
 
   // SelaWalletFactory test - wallet creation
   console.log("\n=== SelaWalletFactory Test ===");
@@ -89,8 +92,8 @@ async function main() {
   const receipt = await createWalletTx.wait();
 
   // Extract wallet address from WalletCreated event
-  const walletCreatedEvent = receipt.logs.find(
-    (log) => log.fragment && log.fragment.name === "WalletCreated"
+  const walletCreatedEvent = receipt.events.find(
+    (event) => event.event === "WalletCreated"
   );
 
   if (walletCreatedEvent) {

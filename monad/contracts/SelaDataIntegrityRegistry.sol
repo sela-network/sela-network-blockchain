@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title SelaDataIntegrityRegistry
@@ -33,7 +33,9 @@ contract SelaDataIntegrityRegistry is Ownable, ReentrancyGuard {
     event HashStored(uint256 indexed hashId, bytes32 indexed dataHash, address indexed submitter, string description);
     event HashVerified(uint256 indexed hashId, bytes32 indexed dataHash, bool isValid);
     
-    constructor() Ownable(msg.sender) {}
+    constructor() {
+        _transferOwnership(msg.sender);
+    }
     
     /**
      * @dev Store data hash value (internal function)
