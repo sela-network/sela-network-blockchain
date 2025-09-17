@@ -1,0 +1,18 @@
+{
+  "canisters": {
+    "icrc1_ledger_canister": {
+      "type": "custom",
+      "candid": "icrc1_ledger.did",
+      "wasm": "icrc1_ledger.wasm.gz",
+      "init_arg": "(variant { Init = record { token_symbol = \"SLP\"; token_name = \"Sela Point\"; decimals = opt 4; minting_account = record { owner = principal \"pxwer-c66zh-67kvk-sz4vq-ip27m-tysdt-6z6me-cfmdc-vpwq4-ciflt-yqe\"; }; transfer_fee = 0; metadata = vec {}; feature_flags = opt record { icrc2 = true }; initial_balances = vec { record { record { owner = principal \"pxwer-c66zh-67kvk-sz4vq-ip27m-tysdt-6z6me-cfmdc-vpwq4-ciflt-yqe\"; }; 0 } }; archive_options = record { num_blocks_to_archive = 100_000; trigger_threshold = 200_000; controller_id = principal \"pxwer-c66zh-67kvk-sz4vq-ip27m-tysdt-6z6me-cfmdc-vpwq4-ciflt-yqe\"; cycles_for_archive_creation = opt 10000000000; } } })"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
