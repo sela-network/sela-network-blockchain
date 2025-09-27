@@ -21,10 +21,15 @@ export const config: ScrapingConfig = {
     //   enabled: true,
     // },
     {
-      url: "https://twitter.com/elonmusk",
       name: "Elon Musk Twitter",
-      scrapeType: "TWITTER_PROFILE",
-      interval: 30000,
+
+      // url: "https://twitter.com/elonmusk",
+      // scrapeType: "TWITTER_PROFILE",
+
+      url: "https://x.com/elonmusk/status/1970345771066093622",
+      scrapeType: "TWITTER_POST",
+
+      interval: 1000 * 60 * 3,
       enabled: true,
     },
     // {

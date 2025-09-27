@@ -29,6 +29,8 @@ export interface ApiRequest {
   scrapeType: string;
   timeoutMs?: number;
   principalId?: string;
+  postCount?: number;
+  replyCount?: number;
 }
 
 export interface ApiResponse {

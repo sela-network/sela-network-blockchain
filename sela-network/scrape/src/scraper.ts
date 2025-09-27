@@ -48,6 +48,12 @@ export class Scraper {
         //   "ye632-5bm3v-j3crp-4jbjo-ztrhi-4ymn2-htifv-vqma7-poxtk-u2bqu-aqe",
       };
 
+      if (target.scrapeType === "TWITTER_PROFILE") {
+        requestBody.postCount = 100;
+      } else if (target.scrapeType === "TWITTER_POST") {
+        requestBody.replyCount = 100;
+      }
+
       const response: AxiosResponse<ApiResponse> = await axios.post(
         this.config.apiEndpoint,
         requestBody,
@@ -70,6 +76,12 @@ export class Scraper {
           data: apiResponse.data,
           responseTime: Date.now() - startTime,
         };
+
+        if (target.scrapeType === "TWITTER_POST") {
+          console.log("result: reply count", result.data.result.reply.length);
+        } else {
+          console.log("result: post count", result.data.result.length);
+        }
 
         console.log(
           `✅ [${target.name}] API scraping successful (${result.responseTime}ms)`
