@@ -31,6 +31,7 @@ export interface ApiRequest {
   principalId?: string;
   postCount?: number;
   replyCount?: number;
+  scrollPauseTime?: number;
 }
 
 export interface ApiResponse {

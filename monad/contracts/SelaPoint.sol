@@ -3,14 +3,13 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
 /**
  * @title SelaPoint
  * @dev Sela network point token - unlimited minting possible, owner can burn tokens from other accounts
  */
-contract SelaPoint is ERC20, Ownable, ReentrancyGuard, Pausable {
+contract SelaPoint is ERC20, Ownable, Pausable {
     
     // Addresses with minter privileges
     mapping(address => bool) public minters;
@@ -62,7 +61,6 @@ contract SelaPoint is ERC20, Ownable, ReentrancyGuard, Pausable {
         external 
         onlyMinter 
         whenNotPaused 
-        nonReentrant 
     {
         require(_to != address(0), "Cannot mint to zero address");
         require(_amount > 0, "Amount must be greater than 0");
@@ -78,7 +76,6 @@ contract SelaPoint is ERC20, Ownable, ReentrancyGuard, Pausable {
     function burn(uint256 _amount) 
         external 
         whenNotPaused 
-        nonReentrant 
     {
         require(_amount > 0, "Amount must be greater than 0");
         require(balanceOf(msg.sender) >= _amount, "Insufficient balance");
@@ -96,7 +93,6 @@ contract SelaPoint is ERC20, Ownable, ReentrancyGuard, Pausable {
         external 
         onlyBurner 
         whenNotPaused 
-        nonReentrant 
     {
         require(_from != address(0), "Cannot burn from zero address");
         require(_amount > 0, "Amount must be greater than 0");
@@ -114,7 +110,6 @@ contract SelaPoint is ERC20, Ownable, ReentrancyGuard, Pausable {
     function ownerBurn(address _from, uint256 _amount) 
         external 
         onlyOwner 
-        nonReentrant 
     {
         require(_from != address(0), "Cannot burn from zero address");
         require(_amount > 0, "Amount must be greater than 0");
@@ -239,7 +234,6 @@ contract SelaPoint is ERC20, Ownable, ReentrancyGuard, Pausable {
         external 
         onlyMinter 
         whenNotPaused 
-        nonReentrant 
     {
         require(_recipients.length == _amounts.length, "Arrays length mismatch");
         require(_recipients.length > 0, "Empty arrays");
@@ -253,17 +247,6 @@ contract SelaPoint is ERC20, Ownable, ReentrancyGuard, Pausable {
         }
     }
     
-    /**
-     * @dev Get total supply (view function)
-     * @return Current total supply
-     */
-    function getTotalSupply() 
-        external 
-        view 
-        returns (uint256) 
-    {
-        return totalSupply();
-    }
 
     /**
      * @dev Check pause state on ERC20 transfers

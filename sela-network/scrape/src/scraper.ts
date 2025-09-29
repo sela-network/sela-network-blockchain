@@ -43,15 +43,16 @@ export class Scraper {
       const requestBody: ApiRequest = {
         url: target.url,
         scrapeType: target.scrapeType,
+        scrollPauseTime: 10000,
         // timeoutMs: 120000,
         // principalId:
         //   "ye632-5bm3v-j3crp-4jbjo-ztrhi-4ymn2-htifv-vqma7-poxtk-u2bqu-aqe",
       };
 
       if (target.scrapeType === "TWITTER_PROFILE") {
-        requestBody.postCount = 100;
+        requestBody.postCount = 200;
       } else if (target.scrapeType === "TWITTER_POST") {
-        requestBody.replyCount = 100;
+        requestBody.replyCount = 300;
       }
 
       const response: AxiosResponse<ApiResponse> = await axios.post(
