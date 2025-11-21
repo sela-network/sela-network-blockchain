@@ -1,24 +1,24 @@
 const { ethers } = require("hardhat");
 
 async function main() {
-  // SelaPoint 컨트랙트 주소 (배포된 주소로 변경 필요)
-  const SELA_POINT_ADDRESS = "0xd43D1530EC32Dc33c95EEA1E5Fd913412eDe1561"; // 실제 배포된 주소로 변경하세요
+  // SelaPower 컨트랙트 주소 (배포된 주소로 변경 필요)
+  const SELA_POWER_ADDRESS = "0xd43D1530EC32Dc33c95EEA1E5Fd913412eDe1561"; // 실제 배포된 주소로 변경하세요
 
   // mint 권한을 부여할 주소
   const MINTER_ADDRESS = "0x53e65Ed4f884Bc5520bd57b0AF1D1e3C2DD27bc6";
 
-  console.log("SelaPoint 컨트랙트에 연결 중...");
+  console.log("SelaPower 컨트랙트에 연결 중...");
 
   // 컨트랙트 인스턴스 가져오기
-  const SelaPoint = await ethers.getContractFactory("SelaPoint");
-  const selaPoint = SelaPoint.attach(SELA_POINT_ADDRESS);
+  const SelaPower = await ethers.getContractFactory("SelaPower");
+  const selaPower = SelaPower.attach(SELA_POWER_ADDRESS);
 
   // 현재 계정 정보
   const [owner] = await ethers.getSigners();
   console.log("Owner 계정:", owner.address);
 
   // 현재 minter 상태 확인
-  const isMinterBefore = await selaPoint.isMinter(MINTER_ADDRESS);
+  const isMinterBefore = await selaPower.isMinter(MINTER_ADDRESS);
   console.log(`${MINTER_ADDRESS}의 현재 minter 상태:`, isMinterBefore);
 
   if (isMinterBefore) {
@@ -29,7 +29,7 @@ async function main() {
   try {
     // minter 권한 부여
     console.log("minter 권한 부여 중...");
-    const tx = await selaPoint.addMinter(MINTER_ADDRESS);
+    const tx = await selaPower.addMinter(MINTER_ADDRESS);
 
     console.log("트랜잭션 해시:", tx.hash);
     console.log("블록 확인 대기 중...");
@@ -41,7 +41,7 @@ async function main() {
     );
 
     // 결과 확인
-    const isMinterAfter = await selaPoint.isMinter(MINTER_ADDRESS);
+    const isMinterAfter = await selaPower.isMinter(MINTER_ADDRESS);
     console.log(`${MINTER_ADDRESS}의 업데이트된 minter 상태:`, isMinterAfter);
 
     if (isMinterAfter) {

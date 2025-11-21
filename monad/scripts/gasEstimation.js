@@ -1,4 +1,4 @@
-const { ethers } = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 
 async function main() {
   console.log("=== Sela Network Gas Fee 계산 ===\n");
@@ -22,11 +22,15 @@ async function main() {
   await walletFactory.deployed();
   console.log("✅ SelaWalletFactory 배포 완료:", walletFactory.address);
 
-  // SelaPoint 배포
-  const SelaPoint = await ethers.getContractFactory("SelaPoint");
-  const selaPoint = await SelaPoint.deploy("Sela Point", "SELA", 0);
-  await selaPoint.deployed();
-  console.log("✅ SelaPoint 배포 완료:", selaPoint.address);
+  // SelaPower 배포 (upgradeable)
+  const SelaPower = await ethers.getContractFactory("SelaPower");
+  const selaPower = await upgrades.deployProxy(
+    SelaPower,
+    ["Sela Power", "SPWR", 0],
+    { kind: "uups" }
+  );
+  await selaPower.deployed();
+  console.log("✅ SelaPower Proxy 배포 완료:", selaPower.address);
 
   // SelaDataIntegrityRegistry 배포
   const SelaDataIntegrityRegistry = await ethers.getContractFactory(
@@ -83,13 +87,13 @@ async function main() {
   // 2. 포인트 발행 Gas 계산
   console.log("2. 포인트 발행 Gas 계산");
   try {
-    const mintAmount = ethers.utils.parseEther("100"); // 100 SELA 토큰
+    const mintAmount = ethers.utils.parseEther("100"); // 100 SPWR 토큰
 
     // Gas 예상
-    const mintGas = await selaPoint.estimateGas.mint(user1.address, mintAmount);
+    const mintGas = await selaPower.estimateGas.mint(user1.address, mintAmount);
     const mintFee = mintGas.mul(gasPrice);
 
-    console.log(`   발행량: 100 SELA 토큰`);
+    console.log(`   발행량: 100 SPWR 토큰`);
     console.log(`   Gas 사용량: ${mintGas.toString()} gas`);
     console.log(`   Gas Fee: ${ethers.utils.formatEther(mintFee)} ETH`);
     console.log(
@@ -97,7 +101,7 @@ async function main() {
     );
 
     // 실제 트랜잭션 실행
-    const mintTx = await selaPoint.mint(user1.address, mintAmount);
+    const mintTx = await selaPower.mint(user1.address, mintAmount);
     const mintReceipt = await mintTx.wait();
     const actualMintGas = mintReceipt.gasUsed;
     const actualMintFee = actualMintGas.mul(gasPrice);

@@ -1,4 +1,4 @@
-const { ethers } = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 
 async function main() {
   const [deployer, user1, user2, user3, dappOwner] = await ethers.getSigners();
@@ -17,17 +17,21 @@ async function main() {
   // 1. 모든 컨트랙트 배포
   console.log("\n1. 모든 Sela 컨트랙트 배포 중...");
 
-  // SelaPoint 배포
-  console.log("\n1-1. SelaPoint 토큰 배포...");
-  const SelaPoint = await ethers.getContractFactory("SelaPoint");
-  const selaPoint = await SelaPoint.deploy(
-    "Sela Point Token",
-    "SELA",
-    ethers.utils.parseEther("10000") // 10,000 SELA 초기 공급량
+  // SelaPower 배포 (upgradeable)
+  console.log("\n1-1. SelaPower 토큰 배포 (upgradeable)...");
+  const SelaPower = await ethers.getContractFactory("SelaPower");
+  const selaPower = await upgrades.deployProxy(
+    SelaPower,
+    [
+      "Sela Power Token",
+      "SPWR",
+      ethers.utils.parseEther("10000") // 10,000 SPWR 초기 공급량
+    ],
+    { kind: "uups" }
   );
-  await selaPoint.deployed();
-  const selaPointAddress = selaPoint.address;
-  console.log(`✅ SelaPoint deployed: ${selaPointAddress}`);
+  await selaPower.deployed();
+  const selaPowerAddress = selaPower.address;
+  console.log(`✅ SelaPower Proxy deployed: ${selaPowerAddress}`);
 
   // SelaDataIntegrityRegistry 배포
   console.log("\n1-2. SelaDataIntegrityRegistry 배포...");
@@ -53,22 +57,22 @@ async function main() {
   console.log("\n2. 토큰 시스템 설정...");
 
   // DApp 소유자를 민터로 추가
-  console.log("DApp 소유자를 SELA 토큰 민터로 추가...");
-  await selaPoint.addMinter(dappOwner.address);
+  console.log("DApp 소유자를 SPWR 토큰 민터로 추가...");
+  await selaPower.addMinter(dappOwner.address);
   console.log(`✅ ${dappOwner.address}가 민터 권한을 획득했습니다`);
 
   // 사용자들에게 초기 토큰 지급
-  console.log("\n사용자들에게 초기 SELA 토큰 지급...");
+  console.log("\n사용자들에게 초기 SPWR 토큰 지급...");
   const initialTokenAmount = ethers.utils.parseEther("100");
 
-  await selaPoint.mint(user1.address, initialTokenAmount);
-  await selaPoint.mint(user2.address, initialTokenAmount);
-  await selaPoint.mint(user3.address, initialTokenAmount);
+  await selaPower.mint(user1.address, initialTokenAmount);
+  await selaPower.mint(user2.address, initialTokenAmount);
+  await selaPower.mint(user3.address, initialTokenAmount);
 
   console.log(
     `✅ 각 사용자에게 ${ethers.utils.formatEther(
       initialTokenAmount
-    )} SELA 지급 완료`
+    )} SPWR 지급 완료`
   );
 
   // 3. 스마트 월렛 생성
@@ -126,7 +130,7 @@ async function main() {
     to: user2.address,
     amount: ethers.utils.parseEther("50"),
     timestamp: Math.floor(Date.now() / 1000),
-    description: "SELA 토큰 P2P 거래",
+    description: "SPWR 토큰 P2P 거래",
   };
 
   const dataString = JSON.stringify(transactionData);
@@ -135,7 +139,7 @@ async function main() {
   // 데이터 해시 저장
   const hashTx = await dataRegistry
     .connect(user1)
-    .storeStringHash(dataString, "User1에서 User2로의 SELA 토큰 거래 데이터");
+    .storeStringHash(dataString, "User1에서 User2로의 SPWR 토큰 거래 데이터");
   const hashReceipt = await hashTx.wait();
 
   // 이벤트에서 해시 ID 추출 (ethers v5 방식)
@@ -161,7 +165,7 @@ async function main() {
   // 5. 통합 시나리오: 리워드 시스템
   console.log("\n5. 통합 리워드 시스템 시나리오...");
 
-  // 시나리오: 사용자가 데이터를 제출하면 리워드로 SELA 토큰을 받음
+  // 시나리오: 사용자가 데이터를 제출하면 리워드로 SPWR 토큰을 받음
   const rewardScenarios = [
     {
       user: user1,
@@ -197,19 +201,19 @@ async function main() {
     await dataHashTx.wait();
 
     // 2. 리워드 토큰 민팅 (DApp 소유자가 민팅)
-    const rewardTx = await selaPoint
+    const rewardTx = await selaPower
       .connect(dappOwner)
       .mint(scenario.user.address, scenario.reward);
     await rewardTx.wait();
 
-    const newBalance = await selaPoint.balanceOf(scenario.user.address);
+    const newBalance = await selaPower.balanceOf(scenario.user.address);
     console.log(
-      `  ✅ 리워드 지급: ${ethers.utils.formatEther(scenario.reward)} SELA`
+      `  ✅ 리워드 지급: ${ethers.utils.formatEther(scenario.reward)} SPWR`
     );
     console.log(
       `  💰 ${scenario.userName} 현재 잔액: ${ethers.utils.formatEther(
         newBalance
-      )} SELA`
+      )} SPWR`
     );
   }
 
@@ -221,41 +225,41 @@ async function main() {
     const recipientWallet = wallets[1];
 
     console.log(
-      `${senderWallet.name} 월렛에서 ${recipientWallet.name} 월렛으로 SELA 토큰 전송...`
+      `${senderWallet.name} 월렛에서 ${recipientWallet.name} 월렛으로 SPWR 토큰 전송...`
     );
 
     // SelaWallet 컨트랙트 인스턴스 생성
     const SelaWallet = await ethers.getContractFactory("SelaWallet");
     const wallet = SelaWallet.attach(senderWallet.address);
 
-    // SELA 토큰 전송을 위한 calldata 생성
+    // SPWR 토큰 전송을 위한 calldata 생성
     const transferAmount = ethers.utils.parseEther("10");
-    const transferCalldata = selaPoint.interface.encodeFunctionData(
+    const transferCalldata = selaPower.interface.encodeFunctionData(
       "transfer",
       [recipientWallet.address, transferAmount]
     );
 
-    // 먼저 월렛에 SELA 토큰 전송
-    await selaPoint
+    // 먼저 월렛에 SPWR 토큰 전송
+    await selaPower
       .connect(senderWallet.user)
       .transfer(senderWallet.address, transferAmount);
     console.log(
       `  💸 ${senderWallet.name} 월렛에 ${ethers.utils.formatEther(
         transferAmount
-      )} SELA 입금`
+      )} SPWR 입금`
     );
 
     // 스마트 월렛을 통해 토큰 전송 실행
     const executeTx = await wallet
       .connect(senderWallet.user)
-      .execute(selaPointAddress, 0, transferCalldata);
+      .execute(selaPowerAddress, 0, transferCalldata);
     await executeTx.wait();
 
-    const finalBalance = await selaPoint.balanceOf(recipientWallet.address);
+    const finalBalance = await selaPower.balanceOf(recipientWallet.address);
     console.log(
       `  ✅ 전송 완료! ${
         recipientWallet.name
-      } 월렛 최종 잔액: ${ethers.utils.formatEther(finalBalance)} SELA`
+      } 월렛 최종 잔액: ${ethers.utils.formatEther(finalBalance)} SPWR`
     );
   }
 
@@ -293,13 +297,13 @@ async function main() {
   console.log("\n8. 최종 시스템 통계...");
 
   console.log("\n📊 토큰 현황:");
-  const totalSupply = await selaPoint.totalSupply();
-  console.log(`  총 공급량: ${ethers.utils.formatEther(totalSupply)} SELA`);
+  const totalSupply = await selaPower.totalSupply();
+  console.log(`  총 공급량: ${ethers.utils.formatEther(totalSupply)} SPWR`);
 
   for (let i = 0; i < users.length; i++) {
-    const balance = await selaPoint.balanceOf(users[i].address);
+    const balance = await selaPower.balanceOf(users[i].address);
     console.log(
-      `  ${userNames[i]} 잔액: ${ethers.utils.formatEther(balance)} SELA`
+      `  ${userNames[i]} 잔액: ${ethers.utils.formatEther(balance)} SPWR`
     );
   }
 
@@ -318,7 +322,7 @@ async function main() {
 
   console.log("\n=== Sela Network 통합 예제 완료 ===");
   console.log("\n🎯 이 예제에서 보여준 핵심 기능들:");
-  console.log("✅ SelaPoint: 토큰 민팅, 전송, 리워드 시스템");
+  console.log("✅ SelaPower: 토큰 민팅, 전송, 리워드 시스템");
   console.log("✅ SelaDataIntegrityRegistry: 데이터 해시 저장 및 무결성 검증");
   console.log("✅ SelaWallet: 스마트 컨트랙트 월렛을 통한 토큰 관리");
   console.log("✅ 통합 시나리오: 데이터 제출 → 무결성 검증 → 리워드 지급");

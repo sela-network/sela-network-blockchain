@@ -1,15 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
- * @title SelaPoint
- * @dev Sela network point token - unlimited minting possible, owner can burn tokens from other accounts
+ * @title SelaPower
+ * @dev Sela network power token - unlimited minting possible, owner can burn tokens from other accounts
+ * @dev Upgradeable contract using UUPS proxy pattern
  */
-contract SelaPoint is ERC20, Ownable, Pausable {
+contract SelaPower is 
+    Initializable, 
+    ERC20Upgradeable, 
+    OwnableUpgradeable, 
+    PausableUpgradeable,
+    UUPSUpgradeable 
+{
     
     // Addresses with minter privileges
     mapping(address => bool) public minters;
@@ -37,12 +46,27 @@ contract SelaPoint is ERC20, Ownable, Pausable {
         _;
     }
     
-    constructor(
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+    
+    /**
+     * @dev Initialize the contract (replaces constructor for upgradeable contracts)
+     * @param _name Token name
+     * @param _symbol Token symbol
+     * @param _initialSupply Initial token supply
+     */
+    function initialize(
         string memory _name,
         string memory _symbol,
         uint256 _initialSupply
-    ) ERC20(_name, _symbol) {
-        _transferOwnership(msg.sender);
+    ) public initializer {
+        __ERC20_init(_name, _symbol);
+        __Ownable_init();
+        __Pausable_init();
+        __UUPSUpgradeable_init();
+        
         // Mint initial supply to contract deployer
         if (_initialSupply > 0) {
             _mint(msg.sender, _initialSupply);
@@ -247,6 +271,13 @@ contract SelaPoint is ERC20, Ownable, Pausable {
         }
     }
     
+    /**
+     * @dev Get contract version
+     * @return Version string
+     */
+    function version() public pure virtual returns (string memory) {
+        return "1.0.0";
+    }
 
     /**
      * @dev Check pause state on ERC20 transfers
@@ -261,4 +292,14 @@ contract SelaPoint is ERC20, Ownable, Pausable {
     ) internal override whenNotPaused {
         super._beforeTokenTransfer(from, to, amount);
     }
+    
+    /**
+     * @dev Authorize upgrade (only owner can upgrade)
+     * @param newImplementation Address of new implementation
+     */
+    function _authorizeUpgrade(address newImplementation) 
+        internal 
+        override 
+        onlyOwner 
+    {}
 } 

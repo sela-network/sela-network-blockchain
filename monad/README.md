@@ -22,17 +22,18 @@ Hash value storage and verification contract for preventing tampering of scraped
 - `verifyDataByHash()`: Direct verification by hash value
 - `getHashInfo()`: Query hash information
 
-### 2. SelaPoint.sol
+### 2. SelaPower.sol
 
-Sela network point token (ERC20 based)
+Sela network power token (ERC20 based) - **Upgradeable via UUPS Proxy**
 
 **Main Features:**
 
-- Point token with unlimited minting capability
+- Power token with unlimited minting capability
 - Owner can burn tokens from other accounts
 - Minter/burner permission management system
 - Pause functionality
 - Batch mint support
+- **Upgradeable contract pattern (UUPS)** - can add new features without changing address
 
 **Core Functions:**
 
@@ -41,6 +42,12 @@ Sela network point token (ERC20 based)
 - `burnFrom()`: Burn tokens from other accounts (requires permission)
 - `ownerBurn()`: Owner's forced burn
 - `batchMint()`: Batch mint
+- `version()`: Get contract version
+
+**Upgrade Functions:**
+
+- Only owner can upgrade the contract
+- See [UPGRADE_GUIDE.md](UPGRADE_GUIDE.md) for detailed instructions
 
 ### 3. SelaWallet.sol & SelaWalletFactory.sol
 
@@ -101,10 +108,10 @@ npm run test
 
 # Individual contract tests
 npm run test:data      # SelaDataIntegrityRegistry test
-npm run test:point     # SelaPoint test
+npm run test:power     # SelaPower test
 npm run test:wallet    # SelaWallet test
 
-# Core contract tests (data integrity + point)
+# Core contract tests (data integrity + power)
 npm run test:core
 ```
 
@@ -116,7 +123,7 @@ npm run test:core
 # Start local Hardhat node
 npm run node
 
-# Deploy in new terminal
+# Deploy in new terminal (includes upgradeable proxy)
 npm run deploy:local
 ```
 
@@ -130,6 +137,32 @@ npm run deploy -- --network monad_testnet
 
 ```bash
 npm run deploy -- --network monad_mainnet
+```
+
+## Upgrading Contracts
+
+SelaPower uses the UUPS upgradeable pattern. 
+
+**📚 Documentation:**
+- 🇺🇸 [UPGRADE_GUIDE.md](UPGRADE_GUIDE.md) - Comprehensive English guide
+- 🇰🇷 [UPGRADE_GUIDE_KO.md](UPGRADE_GUIDE_KO.md) - 상세한 한글 가이드
+- ✅ [UPGRADE_CHECKLIST.md](UPGRADE_CHECKLIST.md) - 빠른 체크리스트
+
+### Quick Upgrade
+
+```bash
+# 1. Check current version
+export SELA_POWER_PROXY_ADDRESS=0x...
+npm run check:version
+
+# 2. Validate upgrade
+npm run upgrade:validate
+
+# 3. If validation passes, upgrade
+npm run upgrade:power
+
+# 4. For specific network
+SELA_POWER_PROXY_ADDRESS=0x... npx hardhat run scripts/upgradeSelaPower.js --network monad_testnet
 ```
 
 ### Run Account Abstraction Example
@@ -165,22 +198,22 @@ const isValid = await selaDataIntegrityRegistry.verifyDataByHashId(
 );
 ```
 
-### SelaPoint Usage
+### SelaPower Usage
 
 ```javascript
 // Mint tokens
 const recipient = "0x1234...";
-const amount = ethers.parseEther("100"); // 100 Sela
-await selaPoint.mint(recipient, amount);
+const amount = ethers.parseEther("100"); // 100 SPWR
+await selaPower.mint(recipient, amount);
 
 // Burn tokens from other account (requires owner permission)
 const targetAccount = "0x5678...";
-const burnAmount = ethers.parseEther("50"); // 50 Sela
-await selaPoint.burnFrom(targetAccount, burnAmount);
+const burnAmount = ethers.parseEther("50"); // 50 SPWR
+await selaPower.burnFrom(targetAccount, burnAmount);
 
 // Grant minter permission
 const newMinter = "0x9abc...";
-await selaPoint.addMinter(newMinter);
+await selaPower.addMinter(newMinter);
 ```
 
 ### Account Abstraction Usage
@@ -219,11 +252,13 @@ console.log("DApp identifier:", await myDAppFactory.getAddress());
    - Original scraped data should be stored safely separately
    - Data source information should be clearly recorded in description
 
-2. **SelaPoint**
+2. **SelaPower**
 
-   - Owner account security is very important (has permission to burn tokens from other accounts)
+   - Owner account security is CRITICAL (has permission to burn tokens AND upgrade the contract)
    - Careful review required when granting minter/burner permissions
    - Pause function should only be used in emergency situations
+   - **Upgrade Safety**: Always validate upgrades on testnet first, follow storage layout rules
+   - Keep backup of implementation addresses for potential rollback
 
 3. **Account Abstraction**
    - Smart wallet owner key management is critical

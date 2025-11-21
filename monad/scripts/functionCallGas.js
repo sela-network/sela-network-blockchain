@@ -1,4 +1,4 @@
-const { ethers } = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 
 async function main() {
   console.log("=== Sela Network 함수 호출 Gas Fee 계산 ===\n");
@@ -20,9 +20,13 @@ async function main() {
   const walletFactory = await SelaWalletFactory.deploy();
   await walletFactory.deployed();
 
-  const SelaPoint = await ethers.getContractFactory("SelaPoint");
-  const selaPoint = await SelaPoint.deploy("Sela Point", "SELA", 0);
-  await selaPoint.deployed();
+  const SelaPower = await ethers.getContractFactory("SelaPower");
+  const selaPower = await upgrades.deployProxy(
+    SelaPower,
+    ["Sela Power", "SPWR", 0],
+    { kind: "uups" }
+  );
+  await selaPower.deployed();
 
   const SelaDataIntegrityRegistry = await ethers.getContractFactory(
     "SelaDataIntegrityRegistry"
@@ -100,10 +104,10 @@ async function main() {
   try {
     const mintAmount = ethers.utils.parseEther("100");
 
-    const mintGas = await selaPoint.estimateGas.mint(user1.address, mintAmount);
+    const mintGas = await selaPower.estimateGas.mint(user1.address, mintAmount);
     const mintFee = mintGas.mul(gasPrice);
 
-    console.log(`   함수: mint() - 100 SELA 토큰 발행`);
+    console.log(`   함수: mint() - 100 SPWR 토큰 발행`);
     console.log(`   Gas 사용량: ${mintGas.toString()} gas`);
     console.log(`   Gas Fee: ${ethers.utils.formatEther(mintFee)} ETH`);
     console.log(
@@ -111,7 +115,7 @@ async function main() {
     );
 
     // 실제 실행
-    const mintTx = await selaPoint.mint(user1.address, mintAmount);
+    const mintTx = await selaPower.mint(user1.address, mintAmount);
     const mintReceipt = await mintTx.wait();
     console.log(`   실제 Gas 사용량: ${mintReceipt.gasUsed.toString()} gas`);
   } catch (error) {
@@ -125,12 +129,12 @@ async function main() {
   try {
     const transferAmount = ethers.utils.parseEther("10");
 
-    const transferGas = await selaPoint
+    const transferGas = await selaPower
       .connect(user1)
       .estimateGas.transfer(user2.address, transferAmount);
     const transferFee = transferGas.mul(gasPrice);
 
-    console.log(`   함수: transfer() - 10 SELA 토큰 전송`);
+    console.log(`   함수: transfer() - 10 SPWR 토큰 전송`);
     console.log(`   Gas 사용량: ${transferGas.toString()} gas`);
     console.log(`   Gas Fee: ${ethers.utils.formatEther(transferFee)} ETH`);
     console.log(
@@ -138,7 +142,7 @@ async function main() {
     );
 
     // 실제 실행
-    const transferTx = await selaPoint
+    const transferTx = await selaPower
       .connect(user1)
       .transfer(user2.address, transferAmount);
     const transferReceipt = await transferTx.wait();

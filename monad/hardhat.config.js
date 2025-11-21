@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("@openzeppelin/hardhat-upgrades");
 require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -30,7 +31,7 @@ module.exports = {
     monad_mainnet: {
       url: process.env.MONAD_MAINNET_RPC_URL || "https://rpc.monad.xyz",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 41455, // Monad mainnet chain ID (example)
+      chainId: 143, // Monad mainnet chain ID (example)
     },
   },
   gasReporter: {

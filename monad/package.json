@@ -8,10 +8,13 @@
     "test": "hardhat test",
     "test:wallet": "hardhat test test/SelaWallet.test.js",
     "test:data": "hardhat test test/SelaDataIntegrityRegistry.test.js",
-    "test:point": "hardhat test test/SelaPoint.test.js",
-    "test:core": "hardhat test test/SelaDataIntegrityRegistry.test.js test/SelaPoint.test.js",
+    "test:power": "hardhat test test/SelaPower.test.js",
+    "test:core": "hardhat test test/SelaDataIntegrityRegistry.test.js test/SelaPower.test.js",
     "deploy": "hardhat run scripts/deploy.js",
     "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "upgrade:validate": "hardhat run scripts/validateUpgrade.js",
+    "upgrade:power": "hardhat run scripts/upgradeSelaPower.js",
+    "check:version": "hardhat run scripts/checkVersion.js",
     "example:wallet": "hardhat run scripts/selaWalletExample.js",
     "example:wallet:local": "hardhat run scripts/selaWalletExample.js --network localhost",
     "node": "hardhat node",
@@ -20,6 +23,8 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
     "@openzeppelin/contracts": "^4.9.0",
+    "@openzeppelin/contracts-upgradeable": "^4.9.0",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
     "hardhat": "2.17.0"
   },
   "dependencies": {

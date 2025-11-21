@@ -1,4 +1,4 @@
-const { ethers } = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -23,18 +23,25 @@ async function main() {
     selaDataIntegrityRegistryAddress
   );
 
-  // SelaPoint contract deployment
-  console.log("\n=== Deploying SelaPoint contract... ===");
-  const SelaPoint = await ethers.getContractFactory("SelaPoint");
-  const selaPoint = await SelaPoint.deploy(
-    "Sela Point", // Token name
-    "Sela", // Token symbol
-    ethers.utils.parseEther("1000000") // Initial supply (1,000,000 Sela)
+  // SelaPower contract deployment (upgradeable via UUPS proxy)
+  console.log("\n=== Deploying SelaPower contract (upgradeable)... ===");
+  const SelaPower = await ethers.getContractFactory("SelaPower");
+  const selaPower = await upgrades.deployProxy(
+    SelaPower,
+    [
+      "Sela Power", // Token name
+      "SPWR", // Token symbol
+      ethers.utils.parseEther("0"), // Initial supply (1,000,000 SPWR)
+    ],
+    { kind: "uups" }
   );
-  await selaPoint.deployed();
+  await selaPower.deployed();
 
-  const selaPointAddress = selaPoint.address;
-  console.log("SelaPoint deployment completed:", selaPointAddress);
+  const selaPowerAddress = selaPower.address;
+  const selaPowerImplementation =
+    await upgrades.erc1967.getImplementationAddress(selaPowerAddress);
+  console.log("SelaPower Proxy deployment completed:", selaPowerAddress);
+  console.log("SelaPower Implementation address:", selaPowerImplementation);
 
   // SelaWalletFactory contract deployment
   console.log("\n=== Deploying SelaWalletFactory contract... ===");
@@ -56,7 +63,7 @@ async function main() {
     "SelaDataIntegrityRegistry address:",
     selaDataIntegrityRegistryAddress
   );
-  console.log("SelaPoint address:", selaPointAddress);
+  console.log("SelaPower address:", selaPowerAddress);
   console.log("SelaWalletFactory address:", selaWalletFactoryAddress);
   console.log("Deployer address:", deployer.address);
 
@@ -64,21 +71,24 @@ async function main() {
   const network = await ethers.provider.getNetwork();
   console.log("Network:", network.name, "Chain ID:", network.chainId);
 
-  // SelaPoint token information check
-  const name = await selaPoint.name();
-  const symbol = await selaPoint.symbol();
-  const totalSupply = await selaPoint.totalSupply();
-  const deployerBalance = await selaPoint.balanceOf(deployer.address);
+  // SelaPower token information check
+  const name = await selaPower.name();
+  const symbol = await selaPower.symbol();
+  const totalSupply = await selaPower.totalSupply();
+  const deployerBalance = await selaPower.balanceOf(deployer.address);
+  const contractVersion = await selaPower.version();
 
-  console.log("\n=== SelaPoint Token Information ===");
+  console.log("\n=== SelaPower Token Information ===");
   console.log("Token name:", name);
   console.log("Token symbol:", symbol);
-  console.log("Total supply:", ethers.utils.formatEther(totalSupply), "Sela");
+  console.log("Contract version:", contractVersion);
+  console.log("Total supply:", ethers.utils.formatEther(totalSupply), "SPWR");
   console.log(
     "Deployer balance:",
     ethers.utils.formatEther(deployerBalance),
-    "Sela"
+    "SPWR"
   );
+  console.log("Upgradeable: Yes (UUPS Proxy)");
 
   // SelaWalletFactory test - wallet creation
   console.log("\n=== SelaWalletFactory Test ===");
@@ -125,7 +135,10 @@ async function main() {
     },
     contracts: {
       SelaDataIntegrityRegistry: selaDataIntegrityRegistryAddress,
-      SelaPoint: selaPointAddress,
+      SelaPower: {
+        proxy: selaPowerAddress,
+        implementation: selaPowerImplementation,
+      },
       SelaWalletFactory: selaWalletFactoryAddress,
     },
     deployer: deployer.address,
